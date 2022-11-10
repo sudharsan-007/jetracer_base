@@ -4,11 +4,15 @@
 # Load the gamepad and time libraries
 import Gamepad
 import time
+import traitlets
 
+from jetracer.nvidia_racecar import NvidiaRacecar
 
-# Gamepad settings
+car = NvidiaRacecar()
+
+# Gamepad settings 
 gamepadType = Gamepad.PS4
-pollInterval = 0.1
+pollInterval = 0.01
 #buttonExit = 'PS'
 
 # Wait for a connection
@@ -30,20 +34,23 @@ gamepad.startBackgroundUpdates()
 try:
     while gamepad.isConnected():
         # Check for the exit button
-        # if gamepad.beenPressed(buttonExit):
-        #     print('EXIT')
-        #     break
+        if gamepad.beenPressed(4):
+            print('EXIT')
+            break
 
         # Update the joystick positions
         # Speed control (inverted)
         speed = -gamepad.axis(1)
         # Steering control (not inverted)
         steering = gamepad.axis(0)
-        print('%+.1f %% speed, %+.1f %% steering' % (speed * 100, steering * 100))
+        # print('%+.1f %% speed, %+.1f %% steering' % (speed * 100, steering * 100))
         print("axis 0: {}, axis 1: {}, axis 2: {}, axis 3: {}, axis 4: {}, axis 5:{}"
               .format(gamepad.axis(0),gamepad.axis(1),gamepad.axis(2),gamepad.axis(3),
                       gamepad.axis(4),gamepad.axis(5)))
         print("Button 0: {}, Button 1: {}, Button 2: {}, Button 3: {}".format(gamepad.isPressed(0),gamepad.isPressed(1),gamepad.isPressed(2),gamepad.isPressed(3)))
+        
+        left_link = traitlets.dlink((str(gamepad.axis(0)), 'value'), (car, 'steering'), transform=lambda x: -x)
+        right_link = traitlets.dlink((str(gamepad.axis(1)), 'value'), (car, 'throttle'), transform=lambda x: -x)
         
         # print("axis 0: {}, axis 1: {}, axis 2: {}, axis 3: {}, axis 4: {}, axis 5:{}, axis 6:{}"
         #       .format(gamepad.axis(0),gamepad.axis(1),gamepad.axis(2),gamepad.axis(3),
